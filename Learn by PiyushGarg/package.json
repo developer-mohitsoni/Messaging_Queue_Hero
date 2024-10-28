@@ -1,6 +1,7 @@
 {
   "name": "learn-by-piyushgarg",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bullmq": "^5.21.2"
+    "bullmq": "^5.21.2",
+    "dotenv": "^16.4.5"
   }
 }
