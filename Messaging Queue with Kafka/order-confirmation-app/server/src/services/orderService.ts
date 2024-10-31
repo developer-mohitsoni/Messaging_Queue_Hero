@@ -1,3 +1,4 @@
+import { sendOrderConfirmationEmail } from "../mailer/mailer";
 import prisma from "../models/prisma";
 
 export const processOrderMessage = async (orderData: {
@@ -14,6 +15,7 @@ export const processOrderMessage = async (orderData: {
     console.log(`New order created: ${newOrder.id}`);
 
     // Send an email notification to the customer
+    await sendOrderConfirmationEmail(orderData.email, orderData.item);
   } catch (error) {
     console.error("Error creating new order:", error);
   }
