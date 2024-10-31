@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { sendMessageToKafka } from "../kafka/producer";
 
 export const createOrder = async (req: Request, res: Response) => {
   const { email, item } = req.body;
@@ -6,8 +7,7 @@ export const createOrder = async (req: Request, res: Response) => {
   const order = { email, item };
 
   try {
-    // Simulate a database write operation
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    sendMessageToKafka("order-confirmation", order);
     res.status(201).json({
       message: "Order placed successfully",
       order,
