@@ -24,11 +24,15 @@ const verificationWorker = new Worker(
 
       const user = userDB.find((user) => user.id === userId);
 
+      // console.log(user);
+
       if (!user) {
         throw new Error("User not found");
       }
       // Verification logic here
       console.log("User verified");
+
+      return { user };
     } catch (err) {
       console.error(err.message);
     }
