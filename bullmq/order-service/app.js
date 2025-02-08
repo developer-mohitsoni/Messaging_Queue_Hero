@@ -11,6 +11,8 @@ app.use(express.json());
 const verifyUser = new Queue("user-verification-queue");
 
 const verificationQueueEvents = new QueueEvents("user-verification-queue");
+
+const mailQueue = new Queue("mail-queue");
 const checkUserVerification = (jobId) => {
   return new Promise((resolve, reject) => {
     verificationQueueEvents.once(
@@ -43,14 +45,26 @@ app.post("/order", async (req, res) => {
 
     let isValidUser = await checkUserVerification(job.id);
 
+    // console.log(isValidUser);
+
     if (!isValidUser) {
       return res.json({
         message: "User verification failed.",
       });
     }
 
+    // save order to database
+
+    const mailJob = await mailQueue.add("Send Mail", {
+      from: "apniCompany@company.com",
+      to: isValidUser.email,
+      subject: "Thank you for your order",
+      body: `Success placing of orders.`,
+    });
+
     return res.send({
       message: "User is valid.",
+      mailJob: mailJob.id,
     });
   } catch (err) {
     console.error(err.message);
