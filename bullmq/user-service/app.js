@@ -1,5 +1,5 @@
 import express from "express";
-import { Queue, Worker } from "bullmq";
+import { Worker } from "bullmq";
 
 const app = express();
 const port = 5001;
@@ -18,24 +18,17 @@ const userDB = [
 
 const verificationWorker = new Worker(
   "user-verification-queue",
-  async (job) => {
-    try {
-      const userId = job.data.userId;
+  (job) => {
+    const userId = job.data.userId;
 
-      const user = userDB.find((user) => user.id === userId);
+    const user = userDB.find((user) => user.id === userId);
 
-      // console.log(user);
+    // console.log(user);
 
-      if (!user) {
-        throw new Error("User not found");
-      }
-      // Verification logic here
-      console.log("User verified");
+    // Verification logic here
+    console.log("User verified");
 
-      return { user };
-    } catch (err) {
-      console.error(err.message);
-    }
+    return { user };
   },
   {
     connection: {
