@@ -13,6 +13,7 @@ const userDB = [
     id: 1,
     name: "Mohit Soni",
     password: "2255",
+    email: "mohit@gmail.com",
   },
 ];
 
