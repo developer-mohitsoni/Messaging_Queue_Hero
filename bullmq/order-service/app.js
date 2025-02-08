@@ -58,5 +58,5 @@ app.post("/order", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Order Service is running on port ${port}`);
 });
