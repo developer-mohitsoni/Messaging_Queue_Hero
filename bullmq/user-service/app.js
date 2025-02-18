@@ -39,6 +39,14 @@ const verificationWorker = new Worker(
   }
 );
 
+verificationWorker.on("completed", (job) => {
+  console.log(`${job.id} has completed!`);
+});
+
+verificationWorker.on("failed", (job, err) => {
+  console.log(`${job.id} has failed with ${err.message}`);
+});
+
 app.listen(port, () => {
   console.log(`User Service is running on port ${port}`);
 });
