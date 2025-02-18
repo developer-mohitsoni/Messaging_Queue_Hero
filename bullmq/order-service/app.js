@@ -8,7 +8,22 @@ app.use(express.json());
 
 //Queue
 
-const verifyUser = new Queue("user-verification-queue");
+const verifyUser = new Queue("user-verification-queue", {
+  defaultJobOptions: {
+    removeOnComplete: {
+      // Retain jobs for 10 sec or max 1000 jobs
+      age: 10,
+      count: 1000,
+    },
+    removeOnFail: {
+      // Retain failed jobs for 24 hours or max 5000 jobs
+      removeOnFail: {
+        age: 3600,
+        count: 5000,
+      },
+    },
+  },
+});
 
 const verificationQueueEvents = new QueueEvents("user-verification-queue");
 
@@ -43,9 +58,11 @@ app.post("/order", async (req, res) => {
       userId,
     });
 
+    console.log(job);
+
     let isValidUser = await checkUserVerification(job.id);
 
-    // console.log(isValidUser);
+    console.log(isValidUser);
 
     if (!isValidUser) {
       return res.json({
