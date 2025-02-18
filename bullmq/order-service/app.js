@@ -30,7 +30,10 @@ const verificationQueueEvents = new QueueEvents("user-verification-queue");
 const mailQueue = new Queue("mail-queue");
 const checkUserVerification = (jobId) => {
   return new Promise((resolve, reject) => {
-    verificationQueueEvents.once(
+    verificationQueueEvents.on("waiting", ({ jobId }) => {
+      console.log(`A job with ID ${jobId} is waiting`);
+    });
+    verificationQueueEvents.on(
       "completed",
       ({ jobId: completedJobId, returnvalue }) => {
         if (jobId === completedJobId) {
@@ -39,7 +42,7 @@ const checkUserVerification = (jobId) => {
         }
       }
     );
-    verificationQueueEvents.once(
+    verificationQueueEvents.on(
       "failed",
       ({ jobId: failedJobId, failedReason }) => {
         if (jobId === failedJobId) {
@@ -52,15 +55,22 @@ const checkUserVerification = (jobId) => {
 
 app.post("/order", async (req, res) => {
   try {
-    const { orderId, productName, price, userId } = req.body;
+    const users = req.body;
+    console.log(users);
 
-    const job = await verifyUser.add("Verify User", {
-      userId,
-    });
+    // 🟢 Bulk job insert
+    const jobs = await verifyUser.addBulk(
+      users.map((user) => ({
+        name: "Verify User",
+        data: user,
+      }))
+    );
 
-    console.log(job);
+    console.log(jobs);
 
-    let isValidUser = await checkUserVerification(job.id);
+    let isValidUser = await Promise.all(
+      jobs.map((job) => checkUserVerification(job.id))
+    );
 
     console.log(isValidUser);
 
@@ -72,17 +82,24 @@ app.post("/order", async (req, res) => {
 
     // save order to database
 
-    const mailJob = await mailQueue.add("Send Mail", {
-      from: "apniCompany@company.com",
-      to: isValidUser.email,
-      subject: "Thank you for your order",
-      body: `Success placing of orders.`,
-    });
+    const mailJob = await mailQueue.addBulk(
+      isValidUser.map((user) => ({
+        name: "Send Mail",
+        data: {
+          from: "apniCompany@company.com",
+          to: user.email,
+          subject: "Thank you for your order",
+          body: `Success placing of orders.`,
+        },
+      }))
+    );
 
-    return res.send({
-      message: "User is valid.",
-      mailJob: mailJob.id,
-    });
+    return res.send(
+      mailJob.map((job) => ({
+        message: "Mail sent successfully",
+        jobId: job.id,
+      }))
+    );
   } catch (err) {
     console.error(err.message);
   }
