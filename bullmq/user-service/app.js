@@ -15,12 +15,25 @@ const userDB = [
     password: "2255",
     email: "mohit@gmail.com",
   },
+  {
+    id: 2,
+    name: "Ayushi Sharma",
+    password: "5588",
+    email: "ayushi@gmail.com",
+  },
+  {
+    id: 4,
+    name: "Priya Sharma",
+    password: "8888",
+    email: "priya@gmail.com",
+  },
 ];
 
 const verificationWorker = new Worker(
   "user-verification-queue",
   (job) => {
     const userId = job.data.userId;
+    console.log(job.data.userId);
 
     const user = userDB.find((user) => user.id === userId);
 
